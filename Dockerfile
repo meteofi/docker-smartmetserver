@@ -48,8 +48,8 @@ RUN yum -y update && yum -y install \
 
 RUN rpm -ivh http://www.nic.funet.fi/pub/mirrors/fedora.redhat.com/pub/epel/7/x86_64/c/cppformat-devel-2.0.0-1.el7.x86_64.rpm http://www.nic.funet.fi/pub/mirrors/fedora.redhat.com/pub/epel/7/x86_64/c/cppformat-2.0.0-1.el7.x86_64.rpm
 
-COPY oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm  /usr/local/src/smartmet/
-RUN rpm -ivh /usr/local/src/smartmet/oracle*.rpm
+RUN rpm -ivh https://meteo.fi/docker/oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm \
+    https://meteo.fi/docker/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
 
 RUN cd /usr/local/src/smartmet && \
     wget http://ctpp.havoc.ru/download/ctpp2-2.8.3.tar.gz && \
