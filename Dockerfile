@@ -225,10 +225,6 @@ RUN ldconfig -v
 COPY smartmetconf /etc/smartmet
 COPY timezones /usr/share/smartmet/timezones
 
-#RUN yum -y erase '*-devel' 
-#RUN yum clean all
-#RUN rm -rf /usr/local/src/smartmet
-
 # Expose GeoServer's default port
 EXPOSE 8080
 
