@@ -218,6 +218,11 @@ RUN cd /usr/local/src/smartmet && \
     sed -e 's/json_spirit\/json_spirit.h/json_spirit.h/g' -i source/Plugin.cpp && \
     make -j4 && make install
 
+RUN cd /usr/local/src/smartmet && \
+    git clone https://github.com/fmidev/smartmet-plugin-autocomplete.git && \
+    cd smartmet-plugin-autocomplete && \
+    make -j4 && make install
+
 
 RUN echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf
 RUN ldconfig -v
