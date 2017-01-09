@@ -51,7 +51,6 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
 		   xqilla-devel \
 		   xerces-c-devel \
     	   	   zlib-devel && \
-    yum clean all && \
     rpm -ivh http://www.nic.funet.fi/pub/mirrors/fedora.redhat.com/pub/epel/7/x86_64/c/cppformat-devel-2.0.0-1.el7.x86_64.rpm \
              http://www.nic.funet.fi/pub/mirrors/fedora.redhat.com/pub/epel/7/x86_64/c/cppformat-2.0.0-1.el7.x86_64.rpm \
 	     https://meteo.fi/docker/oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm \
@@ -161,6 +160,7 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
 # Cleanup
 #
       yum -y erase '*-devel' && \
+      yum clean all && \
       rm -rf /usr/include/smartmet/ 
       
 RUN wget -P /usr/share/smartmet/timezones https://raw.githubusercontent.com/boost-vault/date_time/master/date_time_zonespec.csv
