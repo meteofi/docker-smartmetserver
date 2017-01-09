@@ -122,6 +122,7 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
     	 git clone https://github.com/fmidev/smartmet-library-${LIBRARY}.git && \
     	 cd smartmet-library-${LIBRARY} && \
     	 make  && make install && \
+	 strip /usr/lib64/libsmartmet-${LIBRARY}.so && \
     	 if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-library-${LIBRARY}; fi \
       done && \
 #
@@ -159,9 +160,8 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
 #
 # Cleanup
 #
-      yum -y groupremove "Development tools" && \
       yum -y erase '*-devel' && \
-      rm -rf /usr/include/smartmet/ && \
+      rm -rf /usr/include/smartmet/ 
       
 RUN wget -P /usr/share/smartmet/timezones https://raw.githubusercontent.com/boost-vault/date_time/master/date_time_zonespec.csv
 
@@ -174,5 +174,4 @@ EXPOSE 8080
 COPY docker-entrypoint.sh /
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-#CMD ["bash"]
 CMD ["smartmetd"]
