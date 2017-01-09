@@ -5,7 +5,7 @@ ENV SMARTMET_DEVEL 0
 ENV SMARTMET_LIBRARIES newbase macgyver gis spine locus tron imagine
 ENV SMARTMET_ENGINES sputnik querydata geonames observation gis contour
 ENV SMARTMET_PLUGINS timeseries download admin backend meta wfs frontend
-ENV MAKEFLAGS -j8
+ENV MAKEFLAGS -j2
 
 RUN mkdir -p /usr/local/src/smartmet /smartmet/data /etc/smartmet/plugins /etc/smartmet/engines /var/log/smartmet /usr/share/smartmet/timezones /var/smartmet/timeseriescache
 
