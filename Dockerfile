@@ -112,6 +112,9 @@ RUN mkdir -p /usr/local/include/jssatomic && wget -O /usr/local/include/jssatomi
 
 RUN echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v
 
+#
+# SmartMet Libraries
+#
 RUN for LIBRARY in ${SMARTMET_LIBRARIES}; \
       do \
       	 cd /usr/local/src/smartmet && \
@@ -119,36 +122,45 @@ RUN for LIBRARY in ${SMARTMET_LIBRARIES}; \
     	 cd smartmet-library-${LIBRARY} && \
     	 make -j4 && make install && \
     	 if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-library-${LIBRARY}; fi \
-      done
-
-RUN cd /usr/local/src/smartmet && \
+      done && \
+#
+# SmartMet server
+#
+    cd /usr/local/src/smartmet && \
     git clone https://github.com/fmidev/smartmet-server.git && \
     cd smartmet-server && \
     make -j4 && make install && \
-    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-server; fi
-
-RUN for ENGINE in ${SMARTMET_ENGINES}; \
+    strip /usr/sbin/smartmetd && \
+    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-server; fi && \
+#
+# SmartMet Server Engines
+#
+    for ENGINE in ${SMARTMET_ENGINES}; \
       do \
 	 cd /usr/local/src/smartmet && \    
          git clone https://github.com/fmidev/smartmet-engine-${ENGINE}.git && \
 	 cd smartmet-engine-${ENGINE} && \
 	 make -j4 && make install  && \
-	 if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-engine-${ENGINE}; fi \
-      done
-
-RUN for PLUGIN in ${SMARTMET_PLUGINS}; \
+	 if [ $SMARTMET_DEVEL -ne 1 ]; then strip /usr/share/smartmet/engines/${ENGINE}.so; rm -rf /usr/local/src/smartmet/smartmet-engine-${ENGINE}; fi \
+      done && \
+#
+# SmartMet Server Plugins
+#
+      for PLUGIN in ${SMARTMET_PLUGINS}; \
       do \
       	 cd /usr/local/src/smartmet && \
     	 git clone https://github.com/fmidev/smartmet-plugin-${PLUGIN}.git && \
     	 cd smartmet-plugin-${PLUGIN} && \
 	 if [ -f smartmet-plugin-frontend.spec ]; then sed -e 's/json_spirit\/json_spirit.h/json_spirit.h/g' -i source/Plugin.cpp; fi && \
     	 make -j4 && make install && \
-    	 if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-plugin-${PLUGIN}; fi \
-      done
+    	 if [ $SMARTMET_DEVEL -ne 1 ]; then strip /usr/share/smartmet/plugins/${PLUGIN}.so; rm -rf /usr/local/src/smartmet/smartmet-plugin-${PLUGIN}; fi \
+      done && \
+#
+# Cleanup
+#
+      rm -rf /usr/include/smartmet/
 
-RUN mkdir -p /usr/share/smartmet/timezones && \
-    cd /usr/share/smartmet/timezones && \
-    wget https://raw.githubusercontent.com/boost-vault/date_time/master/date_time_zonespec.csv
+RUN wget -P /usr/share/smartmet/timezones https://raw.githubusercontent.com/boost-vault/date_time/master/date_time_zonespec.csv
 
 COPY smartmetconf /etc/smartmet
 COPY timezones /usr/share/smartmet/timezones
