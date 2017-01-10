@@ -159,6 +159,7 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
 #
 # Cleanup
 #
+      yum -y --setopt=tsflags=noscripts remove libffi-devel && \
       yum -y erase '*-devel' && \
       yum clean all && \
       rm -rf /usr/include/smartmet/ 
