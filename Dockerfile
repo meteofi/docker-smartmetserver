@@ -1,11 +1,11 @@
-FROM centos
+FROM centos:7
 MAINTAINER mikko@meteo.fi
 
 ENV SMARTMET_DEVEL 0
 ENV SMARTMET_LIBRARIES newbase macgyver gis spine locus tron imagine
 ENV SMARTMET_ENGINES sputnik querydata geonames observation gis contour
 ENV SMARTMET_PLUGINS timeseries download admin backend meta wfs frontend
-ENV MAKEFLAGS -j2
+ENV MAKEFLAGS -j8
 
 RUN mkdir -p /usr/local/src/smartmet /smartmet/data /etc/smartmet/plugins /etc/smartmet/engines /var/log/smartmet /usr/share/smartmet/timezones /var/smartmet/timeseriescache
 
@@ -76,15 +76,15 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
     if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/boost_1_55_0; fi && \
     if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/boost_1_55_0.tar.gz; fi && \
 # librsvg
-    cd /usr/local/src/smartmet && \
-    wget http://ftp.gnome.org/pub/gnome/sources/librsvg/2.40/librsvg-2.40.6.tar.xz && \
-    tar xvf librsvg-2.40.6.tar.xz && \
-    cd librsvg-2.40.6 && \
-    export CPPFLAGS="-I/usr/include/glib-2.0/" && \
-    ./configure --disable-static --disable-gtk-doc --disable-gtk-theme --enable-introspection && \
-    make  && make install && \
-    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/librsvg-2.40.6; fi && \
-    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/librsvg-2.40.6.tar.xz; fi && \
+#    cd /usr/local/src/smartmet && \
+#    wget http://ftp.gnome.org/pub/gnome/sources/librsvg/2.40/librsvg-2.40.6.tar.xz && \
+#    tar xvf librsvg-2.40.6.tar.xz && \
+#    cd librsvg-2.40.6 && \
+#    export CPPFLAGS="-I/usr/include/glib-2.0/" && \
+#    ./configure --disable-static --disable-gtk-doc --disable-gtk-theme --enable-introspection && \
+#    make  && make install && \
+#    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/librsvg-2.40.6; fi && \
+#    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/librsvg-2.40.6.tar.xz; fi && \
 # json_spirit
     cd /usr/local/src/smartmet && \
     wget http://il.ma/json_spirit_v4.08.zip && \
@@ -117,8 +117,7 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
     	 git clone https://github.com/fmidev/smartmet-library-${LIBRARY}.git && \
     	 cd smartmet-library-${LIBRARY} && \
     	 make  && make install && \
-	 strip /usr/lib64/libsmartmet-${LIBRARY}.so && \
-    	 if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-library-${LIBRARY}; fi \
+    	 if [ $SMARTMET_DEVEL -ne 1 ]; then strip /usr/lib64/libsmartmet-${LIBRARY}.so; rm -rf /usr/local/src/smartmet/smartmet-library-${LIBRARY}; fi \
       done && \
 #
 # SmartMet server
@@ -126,9 +125,8 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
     cd /usr/local/src/smartmet && \
     git clone https://github.com/fmidev/smartmet-server.git && \
     cd smartmet-server && \
-    make  && make install && \
-    strip /usr/sbin/smartmetd && \
-    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/smartmet-server; fi && \
+    make && make install && \
+    if [ $SMARTMET_DEVEL -ne 1 ]; then strip /usr/sbin/smartmetd; rm -rf /usr/local/src/smartmet/smartmet-server; fi && \
 #
 # SmartMet Server Engines
 #
@@ -137,7 +135,7 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
 	 cd /usr/local/src/smartmet && \    
          git clone https://github.com/fmidev/smartmet-engine-${ENGINE}.git && \
 	 cd smartmet-engine-${ENGINE} && \
-	 make  && make install  && \
+	 make && make install  && \
 	 if [ $SMARTMET_DEVEL -ne 1 ]; then strip /usr/share/smartmet/engines/${ENGINE}.so; rm -rf /usr/local/src/smartmet/smartmet-engine-${ENGINE}; fi \
       done && \
 #
@@ -149,7 +147,7 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
     	 git clone https://github.com/fmidev/smartmet-plugin-${PLUGIN}.git && \
     	 cd smartmet-plugin-${PLUGIN} && \
 	 if [ -f smartmet-plugin-frontend.spec ]; then sed -e 's/json_spirit\/json_spirit.h/json_spirit.h/g' -i source/Plugin.cpp; fi && \
-    	 make  && make install && \
+    	 make && make install && \
     	 if [ $SMARTMET_DEVEL -ne 1 ]; then strip /usr/share/smartmet/plugins/${PLUGIN}.so; rm -rf /usr/local/src/smartmet/smartmet-plugin-${PLUGIN}; fi \
       done && \
 #
