@@ -5,7 +5,7 @@ ENV SMARTMET_DEVEL 0
 ENV SMARTMET_LIBRARIES newbase macgyver gis spine locus tron imagine
 ENV SMARTMET_ENGINES sputnik querydata geonames observation gis contour
 ENV SMARTMET_PLUGINS timeseries download admin backend meta wfs frontend
-ENV MAKEFLAGS -j2
+ENV MAKEFLAGS -j8
 
 RUN mkdir -p /usr/local/src/smartmet /smartmet/data /etc/smartmet/plugins /etc/smartmet/engines /var/log/smartmet /usr/share/smartmet/timezones /var/smartmet/timeseriescache
 
@@ -16,6 +16,7 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
 		   cairo-devel cairo-gobject-devel \
      	   	   elfutils-devel \
 		   file \
+		   fmt-devel \
     	   	   gcc gcc-c++ \
     	   	   gdal-devel \
     	   	   geos-devel \
@@ -51,13 +52,10 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
 		   xqilla-devel \
 		   xerces-c-devel \
     	   	   zlib-devel && \
-    rpm -ivh http://www.nic.funet.fi/pub/mirrors/fedora.redhat.com/pub/epel/7/x86_64/c/cppformat-devel-2.0.0-1.el7.x86_64.rpm \
-             http://www.nic.funet.fi/pub/mirrors/fedora.redhat.com/pub/epel/7/x86_64/c/cppformat-2.0.0-1.el7.x86_64.rpm \
-	     https://meteo.fi/docker/oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm \
-	     https://meteo.fi/docker/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
-
+    rpm -ivh https://meteo.fi/docker/oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm \
+	     https://meteo.fi/docker/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm && \
 # ctpp2
-RUN cd /usr/local/src/smartmet && \
+    cd /usr/local/src/smartmet && \
     wget http://ctpp.havoc.ru/download/ctpp2-2.8.3.tar.gz && \
     tar zxvf ctpp2-2.8.3.tar.gz && \
     cd ctpp2-2.8.3 && \
@@ -106,8 +104,6 @@ RUN cd /usr/local/src/smartmet && \
     ./configure && \
     make && make install && \
     if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/sparsehash; fi && \
-# prettyprint
-    wget -O /usr/include/prettyprint.hpp https://raw.github.com/louisdx/cxx-prettyprint/master/prettyprint.hpp && \
 # atomic_shared_ptr
     mkdir -p /usr/local/include/jssatomic && wget -O /usr/local/include/jssatomic/atomic_shared_ptr.hpp https://bitbucket.org/anthonyw/atomic_shared_ptr/raw/7bdef03f6536f4b9118d267b68da211297cc0143/atomic_shared_ptr && \
 # ldconfig
@@ -161,8 +157,10 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
 #
       yum -y --setopt=tsflags=noscripts remove libffi-devel && \
       yum -y erase '*-devel' && \
+      yum -y erase 'perl-*' && \
+      yum -y erase m4 make cpp cmake postgresql93 glibc-headers && \
       yum clean all && \
-      rm -rf /usr/include/smartmet/ 
+      rm -rf /usr/include /usr/local/include /usr/local/src 
       
 RUN wget -P /usr/share/smartmet/timezones https://raw.githubusercontent.com/boost-vault/date_time/master/date_time_zonespec.csv
 
@@ -170,7 +168,7 @@ COPY smartmetconf /etc/smartmet
 COPY timezones /usr/share/smartmet/timezones
 
 # Expose GeoServer's default port
-EXPOSE 8080
+EXPOSE 80
 
 COPY docker-entrypoint.sh /
 
