@@ -2,9 +2,9 @@ FROM centos:7
 MAINTAINER mikko@meteo.fi
 
 ENV SMARTMET_DEVEL 0
-ENV SMARTMET_LIBRARIES newbase macgyver gis spine locus tron imagine
+ENV SMARTMET_LIBRARIES newbase macgyver gis giza spine locus tron imagine
 ENV SMARTMET_ENGINES sputnik querydata geonames observation gis contour
-ENV SMARTMET_PLUGINS timeseries download admin backend meta wfs frontend
+ENV SMARTMET_PLUGINS timeseries download admin backend meta wfs frontend wms
 ENV MAKEFLAGS -j8
 
 RUN mkdir -p /usr/local/src/smartmet /smartmet/data /etc/smartmet/plugins /etc/smartmet/engines /var/log/smartmet /usr/share/smartmet/timezones /var/smartmet/timeseriescache
@@ -44,7 +44,7 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
     	   	   protobuf-devel protobuf-compiler \
     	   	   postgresql93-devel \
     	   	   python-devel\
-    	   	   scons \
+#    	   	   scons \
 		   soci-devel soci-sqlite3-devel \
 		   sqlite-devel \
     	   	   unzip \
@@ -53,7 +53,10 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
 		   xerces-c-devel \
     	   	   zlib-devel && \
     rpm -ivh https://meteo.fi/docker/oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm \
-	     https://meteo.fi/docker/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm && \
+	     https://meteo.fi/docker/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm \
+	     https://meteo.fi/docker/smartmet-timezones-17.1.28-1.el7.centos.fmi.noarch.rpm \
+	     http://download.weatherproof.fi/fmiforge/rhel/7/x86_64/librsvg2-2.40.6-3.el7.x86_64.rpm \
+	     http://download.weatherproof.fi/fmiforge/rhel/7/x86_64/librsvg2-devel-2.40.6-3.el7.x86_64.rpm && \
 # ctpp2
     cd /usr/local/src/smartmet && \
     wget http://ctpp.havoc.ru/download/ctpp2-2.8.3.tar.gz && \
@@ -97,13 +100,6 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
     make  && make install && \
     if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/json_spirit_v4.08; fi && \
     if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/json_spirit_v4.08.zip; fi && \
-# sparsehash
-    cd /usr/local/src/smartmet && \
-    git clone https://github.com/sparsehash/sparsehash.git && \
-    cd sparsehash && \
-    ./configure && \
-    make && make install && \
-    if [ $SMARTMET_DEVEL -ne 1 ]; then rm -rf /usr/local/src/smartmet/sparsehash; fi && \
 # atomic_shared_ptr
     mkdir -p /usr/local/include/jssatomic && wget -O /usr/local/include/jssatomic/atomic_shared_ptr.hpp https://bitbucket.org/anthonyw/atomic_shared_ptr/raw/7bdef03f6536f4b9118d267b68da211297cc0143/atomic_shared_ptr && \
 # ldconfig
@@ -147,7 +143,7 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
     	 git clone https://github.com/fmidev/smartmet-plugin-${PLUGIN}.git && \
     	 cd smartmet-plugin-${PLUGIN} && \
 	 if [ -f smartmet-plugin-frontend.spec ]; then sed -e 's/json_spirit\/json_spirit.h/json_spirit.h/g' -i source/Plugin.cpp; fi && \
-    	 make && make install && \
+    	 CFLAGS="-DWITHOUT_AUTHENTICATION" make && make install && \
     	 if [ $SMARTMET_DEVEL -ne 1 ]; then strip /usr/share/smartmet/plugins/${PLUGIN}.so; rm -rf /usr/local/src/smartmet/smartmet-plugin-${PLUGIN}; fi \
       done && \
 #
@@ -160,10 +156,10 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
       yum clean all && \
       rm -rf /usr/include /usr/local/include /usr/local/src 
       
-RUN wget -P /usr/share/smartmet/timezones https://raw.githubusercontent.com/boost-vault/date_time/master/date_time_zonespec.csv
-
 COPY smartmetconf /etc/smartmet
-COPY timezones /usr/share/smartmet/timezones
+RUN mkdir -p /smartmet/share
+COPY wms /smartmet/share/
+COPY dali /smartmet/share/
 
 # Expose GeoServer's default port
 EXPOSE 80
