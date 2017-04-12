@@ -144,7 +144,8 @@ echo "/usr/local/lib/" > /etc/ld.so.conf.d/local.conf && ldconfig -v && \
       yum -y erase 'perl-*' && \
       yum -y erase m4 make cpp cmake postgresql93 glibc-headers && \
       yum clean all && \
-      rm -rf /usr/include /usr/local/include /usr/local/src 
+      rm -rf /usr/include /usr/local/include /usr/local/src /usr/share/doc \
+             /usr/sbin/{glibc_post_upgrade.x86_64,sln} /usr/share/gnupg/help*.txt
       
 COPY smartmetconf /etc/smartmet
 RUN mkdir -p /smartmet/share
