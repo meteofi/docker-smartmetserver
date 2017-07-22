@@ -68,6 +68,6 @@ y,Pressure&format=qd&producer=hirlam&origintime=$(date -u +%Y-%m-%dT00Z)&timeste
 ```
 
 #### Access timeseries plugin
-http://container-ip:8080//timeseries?producer=hirlam&lonlat=24.94,60.17&param=time,temperature,pressure
+http://container-ip:8080/timeseries?producer=hirlam&lonlat=24.94,60.17&param=time,temperature,pressure
 
 Get more help for timeseries usage from github [wiki page](https://github.com/fmidev/smartmet-plugin-timeseries/wiki/SmartMet-plugin-TimeSeries).
